@@ -1,26 +1,32 @@
-import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, Image, TouchableOpacity, Linking } from 'react-native';
 
 const CourseCard = ({ course }) => {
   const openCourseVideo = (url) => {
     return () => {
-      console.log("Video URL:", url);
+      if (url) {
+        Linking.openURL(url).catch((err) =>
+          console.error("Failed to open URL:", err)
+        );
+      } else {
+        console.warn("No video URL provided");
+      }
     };
   };
 
   return (
     <View style={styles.card}>
       <View style={styles.imageContainer}>
-        <Image 
-          source={{ uri: course.imageUrl }} 
+        <Image
+          source={{ uri: course.imageUrl }}
           style={styles.image}
           resizeMode="cover"
         />
       </View>
-      
+
       <View style={styles.content}>
         <Text style={styles.title}>{course.title}</Text>
         <Text style={styles.description} numberOfLines={2}>{course.description}</Text>
-        
+
         <View style={styles.details}>
           <View style={styles.detailItem}>
             <Text style={styles.detailLabel}>Niveau: </Text>
@@ -31,16 +37,16 @@ const CourseCard = ({ course }) => {
             <Text style={styles.detailValue}>{course.duration}</Text>
           </View>
         </View>
-        
+
         <View style={styles.stats}>
           <Text style={styles.statItem}>{course.members} leden</Text>
           <Text style={styles.statItem}>{course.views} weergaven</Text>
           <Text style={styles.rating}>⭐ {course.rating}</Text>
         </View>
-        
-        <TouchableOpacity 
+
+        <TouchableOpacity
           style={styles.button}
-          onPress={openCourseVideo(course.videoUrl)}
+          onPress={() => openCourseVideo(course.videoUrl)()}
         >
           <Text style={styles.buttonText}>Bekijk Video</Text>
         </TouchableOpacity>
