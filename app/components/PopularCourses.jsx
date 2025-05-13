@@ -6,7 +6,7 @@ const PopularCourses = ({ courses }) => {
     : [];
 
   return (
-    <View style={styles.container}>
+    <View style={styles.container}>/* Container for the popular courses section */
       <Text style={styles.title}>Populaire Cursussen</Text>
       {Array.isArray(topCourses) && topCourses.length > 0 ? (
         <FlatList
