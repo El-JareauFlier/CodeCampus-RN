@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, Image, TouchableOpacity, Linking } from 'react-
 const CourseCard = ({ course }) => {
   const openCourseVideo = (url) => {
     return () => {
-      if (url) {
+      if (url) {// Check if the URL is valid, otherwise log a warning
         Linking.openURL(url).catch((err) =>
           console.error("Failed to open URL:", err)
         );
