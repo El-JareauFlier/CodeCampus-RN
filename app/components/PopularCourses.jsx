@@ -2,7 +2,7 @@ import { FlatList, StyleSheet, Text, View } from 'react-native';
 
 const PopularCourses = ({ courses }) => {
   const topCourses = Array.isArray(courses)
-    ? [...courses].sort((a, b) => a.views - b.views).slice(0, 3)
+    ? [...courses].sort((a, b) => b.views - a.views).slice(0, 3)
     : [];
 
   return (
