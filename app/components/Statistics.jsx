@@ -1,7 +1,8 @@
-import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import React, { useState } from 'react';
+import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 
 const Statistics = ({ courses }) => {
+  const [expanded, setExpanded] = useState(false);
   const isValidData = Array.isArray(courses);
 
   const getTotalMembers = () => {
@@ -28,21 +29,27 @@ const Statistics = ({ courses }) => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Statistieken</Text>
-      <View style={styles.statsGrid}>
-        <View style={styles.statItem}>
-          <Text style={styles.statLabel}>Totaal Leden</Text>
-          <Text style={styles.statValue}>{getTotalMembers()}</Text>
+      <TouchableOpacity onPress={() => setExpanded((prev) => !prev)}>
+        <Text style={styles.title}>
+          Statistieken {expanded ? '▲' : '▼'}
+        </Text>
+      </TouchableOpacity>
+      {expanded && (
+        <View style={styles.statsGrid}>
+          <View style={styles.statItem}>
+            <Text style={styles.statLabel}>Totaal Leden</Text>
+            <Text style={styles.statValue}>{getTotalMembers()}</Text>
+          </View>
+          <View style={styles.statItem}>
+            <Text style={styles.statLabel}>Totaal Weergaven</Text>
+            <Text style={styles.statValue}>{getTotalViews()}</Text>
+          </View>
+          <View style={styles.statItem}>
+            <Text style={styles.statLabel}>Gemiddelde Rating</Text>
+            <Text style={styles.statValue}>⭐ {getAverageRating()}</Text>
+          </View>
         </View>
-        <View style={styles.statItem}>
-          <Text style={styles.statLabel}>Totaal Weergaven</Text>
-          <Text style={styles.statValue}>{getTotalViews()}</Text>
-        </View>
-        <View style={styles.statItem}>
-          <Text style={styles.statLabel}>Gemiddelde Rating</Text>
-          <Text style={styles.statValue}>⭐ {getAverageRating()}</Text>
-        </View>
-      </View>
+      )}
     </View>
   );
 };
@@ -52,6 +59,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#f8f9fa',
     borderRadius: 10,
     padding: 15,
+    marginBottom: 15,
   },
   title: {
     fontSize: 18,
