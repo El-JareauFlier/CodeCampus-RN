@@ -1,37 +1,55 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
+  TextInput,
 } from 'react-native';
 import CourseList from './CourseList';
 import PopularCourses from './PopularCourses';
 import Statistics from './Statistics';
 
 const Dashboard = ({ courseData }) => {
+  const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('all');
+  const [filteredCourses, setFilteredCourses] = useState(courseData || []);
 
-  const filteredCourses = () => {
-    if (!courseData || !Array.isArray(courseData)) return [];
+  useEffect(() => {
+    let filtered = courseData || [];
 
-    if (activeTab === 'all') {
-      return courseData;
-    } else if (activeTab === 'beginner') {
-      return courseData.filter((course) => course.level === 'Beginner');
+    // Filter by tab
+    if (activeTab === 'beginner') {
+      filtered = filtered.filter((course) => course.level === 'Beginner');
     } else if (activeTab === 'gevorderd') {
-      return courseData.filter((course) => course.level === 'Gevorderd');
+      filtered = filtered.filter((course) => course.level === 'Gevorderd');
     } else if (activeTab === 'populair') {
-      return [...courseData].sort((a, b) => b.views - a.views);
+      filtered = [...filtered].sort((a, b) => b.views - a.views);
     }
 
-    return courseData;
-  };
+    // Filter by search query
+    if (searchQuery) {
+      filtered = filtered.filter((course) =>
+        course.title.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+
+    setFilteredCourses(filtered);
+  }, [searchQuery, activeTab, courseData]);
 
   return (
     <View style={styles.dashboard}>
       <View style={styles.tabContainer}>
+        <TextInput
+          placeholder='search...'
+          clearButtonMode='always'
+          style={styles.searchBox}
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+          placeholderTextColor="rgba(0,0,0,0.4)"
+        />
+
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
@@ -112,7 +130,7 @@ const Dashboard = ({ courseData }) => {
             : 'Meest Bekeken Cursussen'}
         </Text>
 
-        <CourseList courses={filteredCourses()} />
+        <CourseList courses={filteredCourses} />
 
         <View style={styles.sidebarContainer}>
           <PopularCourses courses={courseData} />
@@ -133,6 +151,13 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderBottomWidth: 1,
     borderBottomColor: '#e9ecef',
+  },
+  searchBox: {
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    marginHorizontal: 15,
+    marginBottom: 10,
+    backgroundColor: '#f1f3f5',
   },
   tabScroll: {
     paddingHorizontal: 15,
