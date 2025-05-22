@@ -178,12 +178,12 @@ const styles = StyleSheet.create({
   modalContent: {
     backgroundColor: '#fff',
     borderRadius: 12,
-    padding: 24,
+    padding: 10,
     width: '80%',
-    alignItems: 'center',
+    height: '80%',
   },
   modalTitle: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: '700',
     marginBottom: 16,
   },
