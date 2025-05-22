@@ -29,23 +29,29 @@ const filterLabels = {
 
 const Dashboard = ({ courseData }) => {
   const [activeTab, setActiveTab] = useState('all');
-  const [filteredCourses, setFilteredCourses] = useState(courseData || []);
   const [filterMenuVisible, setFilterMenuVisible] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const filteredCourses = () => {
     if (!courseData || !Array.isArray(courseData)) return [];
 
-    if (activeTab === 'all') {
-      return courseData;
-    } else if (activeTab === 'beginner') {
-      return courseData.filter((course) => course.level === 'Beginner');
+    let filtered = courseData;
+
+    if (activeTab === 'beginner') {
+      filtered = filtered.filter((course) => course.level === 'Beginner');
     } else if (activeTab === 'gevorderd') {
-      return courseData.filter((course) => course.level === 'Gevorderd');
+      filtered = filtered.filter((course) => course.level === 'Gevorderd');
     } else if (activeTab === 'populair') {
-      return [...courseData].sort((a, b) => b.views - a.views);
+      filtered = [...filtered].sort((a, b) => b.views - a.views);
     }
 
-    return courseData;
+    if (searchQuery.trim() !== '') {
+      filtered = filtered.filter((course) =>
+        course.title.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+
+    return filtered;
   };
 
   return (
@@ -68,15 +74,12 @@ const Dashboard = ({ courseData }) => {
           <Text style={styles.filterBtnText}>Filters</Text>
         </TouchableOpacity>
 
-        
-
         <Modal
           visible={filterMenuVisible}
           transparent
           animationType="slide"
           onRequestClose={() => setFilterMenuVisible(false)}
         >
-          {/* filter menu model */}
           <View style={styles.modalOverlay}>
             <View style={styles.modalContent}>
               <Text style={styles.modalTitle}>Filters</Text>
@@ -84,7 +87,6 @@ const Dashboard = ({ courseData }) => {
                 items={filterItems.map((item) => filterLabels[item])}
                 selected={filterLabels[activeTab]}
                 onSelect={(label) => {
-                  // Find the key by label
                   const key = Object.keys(filterLabels).find(
                     (k) => filterLabels[k] === label
                   );
