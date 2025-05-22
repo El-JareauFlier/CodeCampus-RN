@@ -1,17 +1,36 @@
 import { useState } from 'react';
 import {
-  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
+  TextInput,
+  Modal,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import CourseList from './CourseList';
 import PopularCourses from './PopularCourses';
 import Statistics from './Statistics';
+import FilterList from './FilterList';
+
+const filterItems = [
+  'all',
+  'beginner',
+  'gevorderd',
+  'populair',
+];
+
+const filterLabels = {
+  all: 'Alle Cursussen',
+  beginner: 'Voor Beginners',
+  gevorderd: 'Gevorderd',
+  populair: 'Meest Bekeken',
+};
 
 const Dashboard = ({ courseData }) => {
   const [activeTab, setActiveTab] = useState('all');
+  const [filteredCourses, setFilteredCourses] = useState(courseData || []);
+  const [filterMenuVisible, setFilterMenuVisible] = useState(false);
 
   const filteredCourses = () => {
     if (!courseData || !Array.isArray(courseData)) return [];
@@ -32,84 +51,61 @@ const Dashboard = ({ courseData }) => {
   return (
     <View style={styles.dashboard}>
       <View style={styles.tabContainer}>
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          style={styles.tabScroll}
+        <TextInput
+          placeholder='search...'
+          clearButtonMode='always'
+          style={styles.searchBox}
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+          placeholderTextColor="rgba(0,0,0,0.4)"
+        />
+
+        <TouchableOpacity
+          style={styles.filterBtn}
+          onPress={() => setFilterMenuVisible(true)}
         >
-          <TouchableOpacity
-            style={[styles.tabButton, activeTab === 'all' && styles.activeTab]}
-            onPress={() => setActiveTab('all')}
-          >
-            <Text
-              style={[
-                styles.tabText,
-                activeTab === 'all' && styles.activeTabText,
-              ]}
-            >
-              Alle Cursussen
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[
-              styles.tabButton,
-              activeTab === 'beginner' && styles.activeTab,
-            ]}
-            onPress={() => setActiveTab('beginner')}
-          >
-            <Text
-              style={[
-                styles.tabText,
-                activeTab === 'beginner' && styles.activeTabText,
-              ]}
-            >
-              Voor Beginners
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[
-              styles.tabButton,
-              activeTab === 'gevorderd' && styles.activeTab,
-            ]}
-            onPress={() => setActiveTab('gevorderd')}
-          >
-            <Text
-              style={[
-                styles.tabText,
-                activeTab === 'gevorderd' && styles.activeTabText,
-              ]}
-            >
-              Gevorderd
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[
-              styles.tabButton,
-              activeTab === 'populair' && styles.activeTab,
-            ]}
-            onPress={() => setActiveTab('populair')}
-          >
-            <Text
-              style={[
-                styles.tabText,
-                activeTab === 'populair' && styles.activeTabText,
-              ]}
-            >
-              Meest Bekeken
-            </Text>
-          </TouchableOpacity>
-        </ScrollView>
+          <Ionicons name="filter" size={20} color="#fff" style={{ marginRight: 8 }} />
+          <Text style={styles.filterBtnText}>Filters</Text>
+        </TouchableOpacity>
+
+        
+
+        <Modal
+          visible={filterMenuVisible}
+          transparent
+          animationType="slide"
+          onRequestClose={() => setFilterMenuVisible(false)}
+        >
+          {/* filter menu model */}
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContent}>
+              <Text style={styles.modalTitle}>Filters</Text>
+              <FilterList
+                items={filterItems.map((item) => filterLabels[item])}
+                selected={filterLabels[activeTab]}
+                onSelect={(label) => {
+                  // Find the key by label
+                  const key = Object.keys(filterLabels).find(
+                    (k) => filterLabels[k] === label
+                  );
+                  setActiveTab(key);
+                  setFilterMenuVisible(false);
+                }}
+              />
+              <TouchableOpacity
+                style={styles.closeBtn}
+                onPress={() => setFilterMenuVisible(false)}
+              >
+                <Text style={styles.closeBtnText}>Sluiten</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
       </View>
 
       <View style={styles.content}>
         <Text style={styles.sectionTitle}>
-          {activeTab === 'all'
-            ? 'Alle Cursussen'
-            : activeTab === 'beginner'
-            ? 'Cursussen voor Beginners'
-            : activeTab === 'gevorderd'
-            ? 'Gevorderde Cursussen'
-            : 'Meest Bekeken Cursussen'}
+          {filterLabels[activeTab]}
         </Text>
 
         <CourseList courses={filteredCourses()} />
@@ -129,31 +125,34 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   tabContainer: {
-    backgroundColor: '#f8f9fa',
+    backgroundColor: '#fff',
     paddingVertical: 10,
     borderBottomWidth: 1,
     borderBottomColor: '#e9ecef',
+    flexDirection: 'row',
+    alignItems: 'center',
   },
-  tabScroll: {
-    paddingHorizontal: 15,
-  },
-  tabButton: {
+  searchBox: {
+    flex: 1,
     paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
-    marginRight: 10,
+    paddingVertical: 10,
+    marginHorizontal: 10,
+    marginBottom: 0,
     backgroundColor: '#f1f3f5',
   },
-  activeTab: {
+  filterBtn: {
+    display: 'flex',
+    flexDirection: 'row',
     backgroundColor: '#3498db',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    marginHorizontal: 10,
+    marginBottom: 0,
   },
-  tabText: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: '#333',
-  },
-  activeTabText: {
+  filterBtnText: {
     color: '#fff',
+    fontWeight: '600',
+    fontSize: 16,
   },
   content: {
     flex: 1,
@@ -167,6 +166,36 @@ const styles = StyleSheet.create({
   },
   sidebarContainer: {
     marginTop: 20,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.3)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 24,
+    width: '80%',
+    alignItems: 'center',
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    marginBottom: 16,
+  },
+  closeBtn: {
+    marginTop: 20,
+    backgroundColor: '#e74c3c',
+    borderRadius: 20,
+    paddingHorizontal: 18,
+    paddingVertical: 10,
+  },
+  closeBtnText: {
+    color: '#fff',
+    fontWeight: '600',
+    fontSize: 16,
   },
 });
 
