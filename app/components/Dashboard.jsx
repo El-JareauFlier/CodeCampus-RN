@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import {
   StyleSheet,
   Text,
@@ -28,13 +28,12 @@ const filterLabels = {
 };
 
 const Dashboard = ({ courseData }) => {
-  const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('all');
   const [filterMenuVisible, setFilterMenuVisible] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
-  useEffect(() => {
-    let filtered = courseData || [];
+  const filteredCourses = () => {
+    if (!courseData || !Array.isArray(courseData)) return [];
 
     let filtered = courseData;
 
@@ -111,7 +110,7 @@ const Dashboard = ({ courseData }) => {
           {filterLabels[activeTab]}
         </Text>
 
-        <CourseList courses={filteredCourses} />
+        <CourseList courses={filteredCourses()} />
 
         <View style={styles.sidebarContainer}>
           <PopularCourses courses={courseData} />
@@ -179,12 +178,12 @@ const styles = StyleSheet.create({
   modalContent: {
     backgroundColor: '#fff',
     borderRadius: 12,
-    padding: 10,
+    padding: 24,
     width: '80%',
-    height: '80%',
+    alignItems: 'center',
   },
   modalTitle: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: '700',
     marginBottom: 16,
   },
