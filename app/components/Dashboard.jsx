@@ -20,6 +20,12 @@ const filterItems = [
   'populair',
 ];
 
+const sortOptions = [
+  { key: 'populariteit', label: 'Populariteit' },
+  { key: 'rating', label: 'Rating' },
+  { key: 'duur', label: 'Duur' },
+];
+
 const filterLabels = {
   all: 'Alle Cursussen',
   beginner: 'Voor Beginners',
@@ -31,6 +37,7 @@ const Dashboard = ({ courseData }) => {
   const [activeTab, setActiveTab] = useState('all');
   const [filterMenuVisible, setFilterMenuVisible] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [sortBy, setSortBy] = useState('populariteit'); // <-- Added sortBy state
 
   const filteredCourses = () => {
     if (!courseData || !Array.isArray(courseData)) return [];
@@ -41,14 +48,21 @@ const Dashboard = ({ courseData }) => {
       filtered = filtered.filter((course) => course.level === 'Beginner');
     } else if (activeTab === 'gevorderd') {
       filtered = filtered.filter((course) => course.level === 'Gevorderd');
-    } else if (activeTab === 'populair') {
-      filtered = [...filtered].sort((a, b) => b.views - a.views);
     }
 
     if (searchQuery.trim() !== '') {
       filtered = filtered.filter((course) =>
         course.title.toLowerCase().includes(searchQuery.toLowerCase())
       );
+    }
+
+    // Sorting logic
+    if (sortBy === 'populariteit') {
+      filtered = [...filtered].sort((a, b) => (b.views || 0) - (a.views || 0));
+    } else if (sortBy === 'rating') {
+      filtered = [...filtered].sort((a, b) => (b.rating || 0) - (a.rating || 0));
+    } else if (sortBy === 'duur') {
+      filtered = [...filtered].sort((a, b) => (a.duration || 0) - (b.duration || 0));
     }
 
     return filtered;
@@ -88,12 +102,43 @@ const Dashboard = ({ courseData }) => {
                 selected={filterLabels[activeTab]}
                 onSelect={(label) => {
                   const key = Object.keys(filterLabels).find(
-                    (k) => filterLabels[k] === label
+                    (a) => filterLabels[a] === label
                   );
                   setActiveTab(key);
                   setFilterMenuVisible(false);
                 }}
               />
+
+              <Text style={styles.modalTitle}>Sort by</Text>
+              <View>
+                {sortOptions.map((option) => (
+                  <TouchableOpacity
+                    key={option.key}
+                    style={[
+                      styles.filterItem,
+                      { flexDirection: 'row', alignItems: 'center', backgroundColor: 'transparent' } // Always transparent
+                    ]}
+                    onPress={() => setSortBy(option.key)}
+                  >
+                    <View style={[
+                      styles.checkbox,
+                      sortBy === option.key && styles.checkboxChecked
+                    ]}>
+                      {sortBy === option.key && (
+                        <Ionicons name="checkmark" size={16} color="#fff" />
+                      )}
+                    </View>
+                    <Text style={[
+                      styles.filterText,
+                      sortBy === option.key && styles.selectedText2,
+                      { marginLeft: 8 }
+                    ]}>
+                      {option.label}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+
               <TouchableOpacity
                 style={styles.closeBtn}
                 onPress={() => setFilterMenuVisible(false)}
@@ -180,7 +225,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 24,
     width: '80%',
-    alignItems: 'center',
+    alignItems: 'left',
   },
   modalTitle: {
     fontSize: 18,
@@ -198,6 +243,42 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: '600',
     fontSize: 16,
+  },
+  filterItem: {
+    padding: 12,
+    borderRadius: 8,
+    marginVertical: 4,
+    backgroundColor: '#f1f3f5',
+    alignItems: 'center',
+  },
+  selectedItem: {
+    backgroundColor: '#3498db',
+  },
+  filterText: {
+    color: '#333',
+    fontWeight: '500',
+  },
+  selectedText: {
+    color: '#fff',
+    fontWeight: '700',
+  },
+   selectedText2: {
+    color: '#3498db',
+    fontWeight: '700',
+  },
+  checkbox: {
+    width: 20,
+    height: 20,
+    borderRadius: 4,
+    borderWidth: 2,
+    borderColor: '#3498db',
+    backgroundColor: '#fff',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  checkboxChecked: {
+    backgroundColor: '#3498db',
+    borderColor: '#3498db',
   },
 });
 
