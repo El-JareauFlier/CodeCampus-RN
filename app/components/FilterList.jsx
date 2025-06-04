@@ -34,6 +34,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     overflow: 'none',
+    borderRadius: 20,
   },
   filterItem: {
     paddingHorizontal: 12,
@@ -48,6 +49,7 @@ const styles = StyleSheet.create({
     borderColor: '#3498db',
     marginLeft: 4,
     marginBottom: 4,
+    backgroundColor: 'white',
   },
   selectedItem: {
     backgroundColor: '#3498db',

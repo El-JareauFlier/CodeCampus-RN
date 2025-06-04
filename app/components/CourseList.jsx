@@ -1,7 +1,7 @@
 import { View, Text, StyleSheet, FlatList } from 'react-native';
 import CourseCard from './CourseCard';
 
-const CourseList = ({ courses, favorites = [], onToggleFavorite = () => { } }) => {
+const CourseList = ({ courses, favorites = [], onToggleFavorite = () => { }, onPressCourse = () => { } }) => {
   return (
     <View style={styles.container}>
       {courses.length === 0 ? (
@@ -15,6 +15,7 @@ const CourseList = ({ courses, favorites = [], onToggleFavorite = () => { } }) =
                 course={item}
                 isFavorite={favorites.includes(item.id)}
                 onToggleFavorite={() => onToggleFavorite(item.id)}
+                onPress={() => onPressCourse(item)}
               />
             </View>
           )}

@@ -1,7 +1,10 @@
 import { View, Text, StyleSheet, Image, TouchableOpacity, Linking } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 
 const CourseCard = ({ course, isFavorite, onToggleFavorite }) => {
+  const router = useRouter();
+
   const openCourseVideo = (url) => {
     return () => {
       if (url) {// Check if the URL is valid, otherwise log a warning
@@ -15,7 +18,11 @@ const CourseCard = ({ course, isFavorite, onToggleFavorite }) => {
   };
 
   return (
-    <View style={styles.card}>
+    <TouchableOpacity
+      style={styles.card}
+      onPress={() => router.push(`/course/${course.id}`)}
+      activeOpacity={0.9}
+    >
       <View style={styles.imageContainer}>
         <Image
           source={{ uri: course.imageUrl }}
@@ -24,7 +31,10 @@ const CourseCard = ({ course, isFavorite, onToggleFavorite }) => {
         />
         <TouchableOpacity
           style={styles.heartIcon}
-          onPress={onToggleFavorite}
+          onPress={(e) => {
+            e.stopPropagation(); // voorkom dat kaart-click ook triggert
+            onToggleFavorite();
+          }}
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
         >
           <Ionicons
@@ -63,7 +73,7 @@ const CourseCard = ({ course, isFavorite, onToggleFavorite }) => {
           <Text style={styles.buttonText}>Bekijk Video</Text>
         </TouchableOpacity>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 };
 

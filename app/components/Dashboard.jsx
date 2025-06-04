@@ -6,6 +6,8 @@ import {
   View,
   TextInput,
   Modal,
+  ScrollView,
+  Image,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -36,13 +38,14 @@ const filterLabels = {
   favorieten: 'Favorieten', // nieuw
 };
 
-const Dashboard = ({ courseData }) => {
+const Dashboard = ({ courseData, navigation }) => {
   const [activeTabs, setActiveTabs] = useState(['all']);
   const [filterMenuVisible, setFilterMenuVisible] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('populariteit');
   const [selectedCategories, setSelectedCategories] = useState([]); // NEW
   const [favorites, setFavorites] = useState([]);
+  const [selectedCourse, setSelectedCourse] = useState(null);
 
   // Extract unique categories from courseData
   const categories = Array.from(
@@ -78,6 +81,24 @@ const Dashboard = ({ courseData }) => {
   useEffect(() => {
     AsyncStorage.setItem('favorites', JSON.stringify(favorites));
   }, [favorites]);
+
+  // Load selected categories on mount
+  useEffect(() => {
+    AsyncStorage.getItem('selectedCategories').then((value) => {
+      if (value) {
+        try {
+          setSelectedCategories(JSON.parse(value));
+        } catch (e) {
+          setSelectedCategories([]);
+        }
+      }
+    });
+  }, []);
+
+  // Save selected categories when they change
+  useEffect(() => {
+    AsyncStorage.setItem('selectedCategories', JSON.stringify(selectedCategories));
+  }, [selectedCategories]);
 
   const toggleFavorite = (courseId) => {
     setFavorites((prev) =>
@@ -255,6 +276,7 @@ const Dashboard = ({ courseData }) => {
           courses={filteredCourses()}
           favorites={favorites}
           onToggleFavorite={toggleFavorite}
+          onPressCourse={course => navigation.navigate('CourseDetail', { course })}
         />
 
         <View style={styles.sidebarContainer}>
@@ -262,6 +284,51 @@ const Dashboard = ({ courseData }) => {
           <Statistics courses={courseData} />
         </View>
       </View>
+
+      {/* Detail Modal */}
+      <Modal
+        visible={!!selectedCourse}
+        animationType="slide"
+        transparent
+        onRequestClose={() => setSelectedCourse(null)}
+      >
+        <View style={styles.detailModalOverlay}>
+          <View style={styles.detailModalContent}>
+            <ScrollView>
+              <TouchableOpacity
+                style={{ alignSelf: 'flex-end', marginBottom: 10 }}
+                onPress={() => setSelectedCourse(null)}
+              >
+                <Ionicons name="close" size={28} color="#333" />
+              </TouchableOpacity>
+              {selectedCourse && (
+                <>
+                  <Image
+                    source={{ uri: selectedCourse.imageUrl }}
+                    style={{ width: '100%', height: 200, borderRadius: 10, marginBottom: 16 }}
+                    resizeMode="cover"
+                  />
+                  <Text style={{ fontSize: 22, fontWeight: 'bold', marginBottom: 8 }}>
+                    {selectedCourse.title}
+                  </Text>
+                  <Text style={{ fontSize: 16, color: '#666', marginBottom: 16 }}>
+                    {selectedCourse.description}
+                  </Text>
+                  <Text style={{ fontWeight: 'bold', marginBottom: 4 }}>Leerdoelen:</Text>
+                  {selectedCourse.goals && selectedCourse.goals.length > 0 ? (
+                    selectedCourse.goals.map((goal, idx) => (
+                      <Text key={idx} style={{ marginLeft: 8, marginBottom: 2 }}>• {goal}</Text>
+                    ))
+                  ) : (
+                    <Text style={{ marginLeft: 8, marginBottom: 8, color: '#aaa' }}>Geen leerdoelen beschikbaar.</Text>
+                  )}
+                  {/* Voeg hier meer relevante info toe indien gewenst */}
+                </>
+              )}
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
@@ -397,6 +464,20 @@ const styles = StyleSheet.create({
   checkboxChecked: {
     backgroundColor: '#3498db',
     borderColor: '#3498db',
+  },
+  detailModalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.3)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  detailModalContent: {
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    padding: 24,
+    width: '90%',
+    maxHeight: '85%',
+    elevation: 5,
   },
 });
 
