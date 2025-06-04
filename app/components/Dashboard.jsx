@@ -19,6 +19,7 @@ const filterItems = [
   'beginner',
   'gevorderd',
   'populair',
+  'favorieten', // nieuw
 ];
 
 const sortOptions = [
@@ -32,6 +33,7 @@ const filterLabels = {
   beginner: 'Voor Beginners',
   gevorderd: 'Gevorderd',
   populair: 'Meest Bekeken',
+  favorieten: 'Favorieten', // nieuw
 };
 
 const Dashboard = ({ courseData }) => {
@@ -40,6 +42,7 @@ const Dashboard = ({ courseData }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('populariteit');
   const [selectedCategories, setSelectedCategories] = useState([]); // NEW
+  const [favorites, setFavorites] = useState([]);
 
   // Extract unique categories from courseData
   const categories = Array.from(
@@ -64,6 +67,26 @@ const Dashboard = ({ courseData }) => {
     AsyncStorage.setItem('activeTabs', JSON.stringify(activeTabs));
   }, [activeTabs]);
 
+  // Load favorites on mount
+  useEffect(() => {
+    AsyncStorage.getItem('favorites').then((value) => {
+      if (value) setFavorites(JSON.parse(value));
+    });
+  }, []);
+
+  // Save favorites when they change
+  useEffect(() => {
+    AsyncStorage.setItem('favorites', JSON.stringify(favorites));
+  }, [favorites]);
+
+  const toggleFavorite = (courseId) => {
+    setFavorites((prev) =>
+      prev.includes(courseId)
+        ? prev.filter((id) => id !== courseId)
+        : [...prev, courseId]
+    );
+  };
+
   const filteredCourses = () => {
     if (!courseData || !Array.isArray(courseData)) return [];
 
@@ -75,6 +98,7 @@ const Dashboard = ({ courseData }) => {
         if (activeTabs.includes('beginner') && course.level === 'Beginner') return true;
         if (activeTabs.includes('gevorderd') && course.level === 'Gevorderd') return true;
         if (activeTabs.includes('populair')) return true;
+        if (activeTabs.includes('favorieten') && favorites.includes(course.id)) return true; // nieuw
         return false;
       });
     }
@@ -227,7 +251,11 @@ const Dashboard = ({ courseData }) => {
           {activeTabs.map((key) => filterLabels[key]).join(', ')}
         </Text>
 
-        <CourseList courses={filteredCourses()} />
+        <CourseList
+          courses={filteredCourses()}
+          favorites={favorites}
+          onToggleFavorite={toggleFavorite}
+        />
 
         <View style={styles.sidebarContainer}>
           <PopularCourses courses={courseData} />

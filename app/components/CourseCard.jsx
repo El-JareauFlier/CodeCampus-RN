@@ -1,6 +1,7 @@
 import { View, Text, StyleSheet, Image, TouchableOpacity, Linking } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 
-const CourseCard = ({ course }) => {
+const CourseCard = ({ course, isFavorite, onToggleFavorite }) => {
   const openCourseVideo = (url) => {
     return () => {
       if (url) {// Check if the URL is valid, otherwise log a warning
@@ -21,6 +22,17 @@ const CourseCard = ({ course }) => {
           style={styles.image}
           resizeMode="cover"
         />
+        <TouchableOpacity
+          style={styles.heartIcon}
+          onPress={onToggleFavorite}
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+        >
+          <Ionicons
+            name={isFavorite ? "heart" : "heart-outline"}
+            size={24}
+            color={isFavorite ? "#e74c3c" : "#fff"}
+          />
+        </TouchableOpacity>
       </View>
 
       <View style={styles.content}>
@@ -67,6 +79,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   imageContainer: {
+    position: 'relative',
     height: 180,
     borderTopLeftRadius: 10,
     borderTopRightRadius: 10,
@@ -74,7 +87,16 @@ const styles = StyleSheet.create({
   },
   image: {
     width: '100%',
-    height: '100%',
+    height: 180, // Match the container height
+  },
+  heartIcon: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    backgroundColor: 'rgba(0,0,0,0.3)',
+    borderRadius: 16,
+    padding: 4,
+    zIndex: 2,
   },
   content: {
     padding: 15,

@@ -1,7 +1,7 @@
 import { View, Text, StyleSheet, FlatList } from 'react-native';
 import CourseCard from './CourseCard';
 
-const CourseList = ({ courses }) => {
+const CourseList = ({ courses, favorites = [], onToggleFavorite = () => { } }) => {
   return (
     <View style={styles.container}>
       {courses.length === 0 ? (
@@ -9,7 +9,15 @@ const CourseList = ({ courses }) => {
       ) : (
         <FlatList
           data={courses}
-          renderItem={({ item }) => <CourseCard course={item} />}
+          renderItem={({ item }) => (
+            <View style={styles.courseItem}>
+              <CourseCard
+                course={item}
+                isFavorite={favorites.includes(item.id)}
+                onToggleFavorite={() => onToggleFavorite(item.id)}
+              />
+            </View>
+          )}
           contentContainerStyle={styles.listContent}
           showsVerticalScrollIndicator={false}
         />
@@ -30,6 +38,14 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#666',
     padding: 20,
+  },
+  courseItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
   },
 });
 
