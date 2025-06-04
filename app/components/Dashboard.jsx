@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   StyleSheet,
   Text,
@@ -8,6 +8,7 @@ import {
   Modal,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import CourseList from './CourseList';
 import PopularCourses from './PopularCourses';
 import Statistics from './Statistics';
@@ -34,20 +35,55 @@ const filterLabels = {
 };
 
 const Dashboard = ({ courseData }) => {
-  const [activeTab, setActiveTab] = useState('all');
+  const [activeTabs, setActiveTabs] = useState(['all']);
   const [filterMenuVisible, setFilterMenuVisible] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [sortBy, setSortBy] = useState('populariteit'); // <-- Added sortBy state
+  const [sortBy, setSortBy] = useState('populariteit');
+  const [selectedCategories, setSelectedCategories] = useState([]); // NEW
+
+  // Extract unique categories from courseData
+  const categories = Array.from(
+    new Set((courseData || []).flatMap(course => course.categories || []))
+  );
+
+  // Load filters on mount
+  useEffect(() => {
+    AsyncStorage.getItem('activeTabs').then((value) => {
+      if (value) {
+        try {
+          setActiveTabs(JSON.parse(value));
+        } catch (e) {
+          setActiveTabs(['all']);
+        }
+      }
+    });
+  }, []);
+
+  // Save filters when they change
+  useEffect(() => {
+    AsyncStorage.setItem('activeTabs', JSON.stringify(activeTabs));
+  }, [activeTabs]);
 
   const filteredCourses = () => {
     if (!courseData || !Array.isArray(courseData)) return [];
 
     let filtered = courseData;
 
-    if (activeTab === 'beginner') {
-      filtered = filtered.filter((course) => course.level === 'Beginner');
-    } else if (activeTab === 'gevorderd') {
-      filtered = filtered.filter((course) => course.level === 'Gevorderd');
+    // Filtering by multiple tabs
+    if (!activeTabs.includes('all')) {
+      filtered = filtered.filter((course) => {
+        if (activeTabs.includes('beginner') && course.level === 'Beginner') return true;
+        if (activeTabs.includes('gevorderd') && course.level === 'Gevorderd') return true;
+        if (activeTabs.includes('populair')) return true;
+        return false;
+      });
+    }
+
+    // Filter by selected categories
+    if (selectedCategories.length > 0) {
+      filtered = filtered.filter(course =>
+        (course.categories || []).some(cat => selectedCategories.includes(cat))
+      );
     }
 
     if (searchQuery.trim() !== '') {
@@ -57,7 +93,7 @@ const Dashboard = ({ courseData }) => {
     }
 
     // Sorting logic
-    if (sortBy === 'populariteit') {
+    if (sortBy === 'populariteit' || activeTabs.includes('populair')) {
       filtered = [...filtered].sort((a, b) => (b.views || 0) - (a.views || 0));
     } else if (sortBy === 'rating') {
       filtered = [...filtered].sort((a, b) => (b.rating || 0) - (a.rating || 0));
@@ -99,13 +135,33 @@ const Dashboard = ({ courseData }) => {
               <Text style={styles.modalTitle}>Filters</Text>
               <FilterList
                 items={filterItems.map((item) => filterLabels[item])}
-                selected={filterLabels[activeTab]}
+                selected={activeTabs.map((key) => filterLabels[key])}
                 onSelect={(label) => {
                   const key = Object.keys(filterLabels).find(
                     (a) => filterLabels[a] === label
                   );
-                  setActiveTab(key);
-                  setFilterMenuVisible(false);
+                  setActiveTabs((prev) => {
+                    if (key === 'all') return ['all'];
+                    let next = prev.includes(key)
+                      ? prev.filter((k) => k !== key)
+                      : [...prev.filter((k) => k !== 'all'), key];
+                    if (next.length === 0) next = ['all'];
+                    return next;
+                  });
+                }}
+              />
+
+              {/* CATEGORY FILTER LIST */}
+              <Text style={styles.modalTitle}>Categorieën</Text>
+              <FilterList
+                items={categories}
+                selected={selectedCategories}
+                onSelect={(category) => {
+                  setSelectedCategories((prev) =>
+                    prev.includes(category)
+                      ? prev.filter((c) => c !== category)
+                      : [...prev, category]
+                  );
                 }}
               />
 
@@ -114,10 +170,13 @@ const Dashboard = ({ courseData }) => {
                 {sortOptions.map((option) => (
                   <TouchableOpacity
                     key={option.key}
-                    style={[
-                      styles.filterItem,
-                      { flexDirection: 'row', alignItems: 'center', backgroundColor: 'transparent' } // Always transparent
-                    ]}
+                    style={{
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      backgroundColor: 'transparent',
+                      paddingVertical: 8,
+                      paddingHorizontal: 0,
+                    }}
                     onPress={() => setSortBy(option.key)}
                   >
                     <View style={[
@@ -139,12 +198,25 @@ const Dashboard = ({ courseData }) => {
                 ))}
               </View>
 
-              <TouchableOpacity
-                style={styles.closeBtn}
-                onPress={() => setFilterMenuVisible(false)}
-              >
-                <Text style={styles.closeBtnText}>Sluiten</Text>
-              </TouchableOpacity>
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 20 }}>
+                <TouchableOpacity
+                  style={[styles.closeBtn, { flex: 1, marginRight: 10 }]}
+                  onPress={() => setFilterMenuVisible(false)}
+                >
+                  <Text style={styles.closeBtnText}>apply</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.resetBtn, { flex: 1, marginLeft: 10 }]}
+                  onPress={() => {
+                    setActiveTabs(['all']);
+                    setSelectedCategories([]);
+                    setSortBy('populariteit');
+                    setSearchQuery('');
+                  }}
+                >
+                  <Text style={styles.resetBtnText}>reset</Text>
+                </TouchableOpacity>
+              </View>
             </View>
           </View>
         </Modal>
@@ -152,7 +224,7 @@ const Dashboard = ({ courseData }) => {
 
       <View style={styles.content}>
         <Text style={styles.sectionTitle}>
-          {filterLabels[activeTab]}
+          {activeTabs.map((key) => filterLabels[key]).join(', ')}
         </Text>
 
         <CourseList courses={filteredCourses()} />
@@ -214,27 +286,29 @@ const styles = StyleSheet.create({
   sidebarContainer: {
     marginTop: 20,
   },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.3)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  modalContent: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 24,
-    width: '80%',
-    alignItems: 'left',
-  },
+modalOverlay: {
+  flex: 1,
+  justifyContent: 'flex-end', // push to bottom
+  backgroundColor: 'rgba(0,0,0,0.3)',
+},
+
+modalContent: {
+  backgroundColor: '#fff',
+  width: '100%',
+  padding: 24,
+  borderTopLeftRadius: 20,
+  borderTopRightRadius: 20,
+  maxHeight: '90%',
+},
   modalTitle: {
     fontSize: 18,
     fontWeight: '700',
     marginBottom: 16,
+    marginTop: 50,
   },
   closeBtn: {
     marginTop: 20,
-    backgroundColor: '#e74c3c',
+    backgroundColor: '#3498db',
     borderRadius: 20,
     paddingHorizontal: 18,
     paddingVertical: 10,
@@ -244,10 +318,23 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     fontSize: 16,
   },
+  resetBtn: {
+    marginTop: 20,
+    backgroundColor: '#e74c3c',
+    borderRadius: 20,
+    paddingHorizontal: 18,
+    paddingVertical: 10,
+  },
+  resetBtnText: {
+    color: '#fff',
+    fontWeight: '600',
+    fontSize: 16,
+  },
   filterItem: {
-    padding: 12,
+    paddingVertical: 6, // was 12
+    paddingHorizontal: 12, // was 12 or 16
     borderRadius: 8,
-    marginVertical: 4,
+    marginVertical: 2, // was 4
     backgroundColor: '#f1f3f5',
     alignItems: 'center',
   },
@@ -257,14 +344,17 @@ const styles = StyleSheet.create({
   filterText: {
     color: '#333',
     fontWeight: '500',
+    fontSize: 14, // add or adjust as needed
   },
   selectedText: {
     color: '#fff',
     fontWeight: '700',
+    fontSize: 14, // add or adjust as needed
   },
-   selectedText2: {
+  selectedText2: {
     color: '#3498db',
     fontWeight: '700',
+    fontSize: 14, // add or adjust as needed
   },
   checkbox: {
     width: 20,
