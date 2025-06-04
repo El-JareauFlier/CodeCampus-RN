@@ -1,8 +1,8 @@
 import React from 'react';
-import { ScrollView, TouchableOpacity, Text, StyleSheet } from 'react-native';
+import { View, TouchableOpacity, Text, StyleSheet } from 'react-native';
 
 const FilterList = ({ items, selected, onSelect }) => (
-  <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.scrollContainer}>
+  <View style={styles.scrollContainer}>
     {items.map((label) => {
       const isSelected = selected.includes(label);
       return (
@@ -23,25 +23,31 @@ const FilterList = ({ items, selected, onSelect }) => (
         </TouchableOpacity>
       );
     })}
-  </ScrollView>
+  </View>
 );
 
 const styles = StyleSheet.create({
   scrollContainer: {
+    display: 'flex',
     paddingVertical: 6,
     paddingHorizontal: 8,
     flexDirection: 'row',
+    flexWrap: 'wrap',
+    overflow: 'none',
   },
   filterItem: {
-    paddingVertical: 6,
     paddingHorizontal: 12,
     borderRadius: 16,
     marginHorizontal: 4,
-    backgroundColor: '#f1f3f5',  
+    backgroundColor: '',  
     minHeight: 32,
     minWidth: 48,
     justifyContent: 'center',
     alignItems: 'center',
+    borderWidth: 2,
+    borderColor: '#3498db',
+    marginLeft: 4,
+    marginBottom: 4,
   },
   selectedItem: {
     backgroundColor: '#3498db',

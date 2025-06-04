@@ -286,20 +286,20 @@ const styles = StyleSheet.create({
   sidebarContainer: {
     marginTop: 20,
   },
-modalOverlay: {
-  flex: 1,
-  justifyContent: 'flex-end', // push to bottom
-  backgroundColor: 'rgba(0,0,0,0.3)',
-},
+  modalOverlay: {
+    flex: 1,
+    justifyContent: 'flex-end', // push to bottom
+    backgroundColor: 'rgba(0,0,0,0.3)',
+  },
 
-modalContent: {
-  backgroundColor: '#fff',
-  width: '100%',
-  padding: 24,
-  borderTopLeftRadius: 20,
-  borderTopRightRadius: 20,
-  maxHeight: '90%',
-},
+  modalContent: {
+    backgroundColor: '#fff',
+    width: '100%',
+    padding: 24,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    maxHeight: '90%',
+  },
   modalTitle: {
     fontSize: 18,
     fontWeight: '700',
