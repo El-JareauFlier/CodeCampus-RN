@@ -211,7 +211,12 @@ const Dashboard = ({ courseData, navigation }) => {
               />
 
               <Text style={styles.modalTitle}>Sort by</Text>
-              <View>
+              <View style={{
+                backgroundColor: '#f6fafd',
+                borderRadius: 8,
+                padding: 8,
+              }}
+              >
                 {sortOptions.map((option) => (
                   <TouchableOpacity
                     key={option.key}
@@ -390,16 +395,16 @@ const styles = StyleSheet.create({
   modalContent: {
     backgroundColor: '#fff',
     width: '100%',
-    padding: 24,
+    padding: 20,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
-    maxHeight: '90%',
+    maxHeight: '100%',
   },
   modalTitle: {
     fontSize: 18,
     fontWeight: '700',
-    marginBottom: 16,
-    marginTop: 50,
+    marginBottom: 10,
+    marginTop: 10,
   },
   closeBtn: {
     marginTop: 20,
@@ -407,6 +412,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     paddingHorizontal: 18,
     paddingVertical: 10,
+    marginBottom: 20,
   },
   closeBtnText: {
     color: '#fff',
@@ -419,6 +425,8 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     paddingHorizontal: 18,
     paddingVertical: 10,
+    marginBottom: 20,
+
   },
   resetBtnText: {
     color: '#fff',
