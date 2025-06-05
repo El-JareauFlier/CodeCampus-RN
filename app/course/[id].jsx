@@ -1,5 +1,5 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { View, Text, Image, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, Image, ScrollView, StyleSheet, TouchableOpacity, Linking } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import courses from '../data/_coursesData.js';
 
@@ -25,15 +25,64 @@ export default function CourseDetailScreen() {
       <View style={styles.content}>
         <Text style={styles.title}>{course.title}</Text>
         <Text style={styles.description}>{course.description}</Text>
-        <Text style={styles.sectionTitle}>Leerdoelen</Text>
-        {course.goals && course.goals.length > 0 ? (
-          course.goals.map((goal, idx) => (
-            <Text key={idx} style={styles.goal}>• {goal}</Text>
-          ))
+
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', marginBottom: 12 }}>
+          <Text style={{ marginRight: 16, fontSize: 15 }}>
+            <Text style={{ fontWeight: 'bold' }}>Niveau:</Text> {course.level}
+          </Text>
+          <Text style={{ marginRight: 16, fontSize: 15 }}>
+            <Text style={{ fontWeight: 'bold' }}>Duur:</Text> {course.duration}
+          </Text>
+          <Text style={{ marginRight: 16, fontSize: 15 }}>
+            <Text style={{ fontWeight: 'bold' }}>Leden:</Text> {course.members}
+          </Text>
+          <Text style={{ marginRight: 16, fontSize: 15 }}>
+            <Text style={{ fontWeight: 'bold' }}>Weergaven:</Text> {course.views}
+          </Text>
+          <Text style={{ fontSize: 15 }}>
+            <Text style={{ fontWeight: 'bold' }}>Rating:</Text> ⭐ {course.rating}
+          </Text>
+        </View>
+
+        <Text style={styles.sectionTitle}>Categorieën</Text>
+        {course.categories && course.categories.length > 0 ? (
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', marginBottom: 12 }}>
+            {course.categories.map((cat, idx) => (
+              <Text
+                key={idx}
+                style={{
+                  backgroundColor: '#e3f2fd',
+                  color: '#1976d2',
+                  borderRadius: 12,
+                  paddingHorizontal: 10,
+                  paddingVertical: 4,
+                  marginRight: 8,
+                  marginBottom: 4,
+                  fontSize: 13,
+                }}
+              >
+                {cat}
+              </Text>
+            ))}
+          </View>
         ) : (
-          <Text style={styles.goal}>Geen leerdoelen beschikbaar.</Text>
+          <Text style={{ color: '#aaa', marginBottom: 8 }}>Geen categorieën beschikbaar.</Text>
         )}
-        {/* Voeg hier meer relevante info toe */}
+
+        {course.videoUrl && (
+          <TouchableOpacity
+            style={{
+              backgroundColor: '#3498db',
+              padding: 14,
+              borderRadius: 8,
+              marginTop: 16,
+              alignItems: 'center',
+            }}
+            onPress={() => Linking.openURL(course.videoUrl)}
+          >
+            <Text style={{ color: '#fff', fontWeight: 'bold' }}>Bekijk video</Text>
+          </TouchableOpacity>
+        )}
       </View>
     </ScrollView>
   );
