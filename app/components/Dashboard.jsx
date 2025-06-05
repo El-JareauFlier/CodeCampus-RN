@@ -127,7 +127,9 @@ const Dashboard = ({ courseData, navigation }) => {
     // Filter by selected categories
     if (selectedCategories.length > 0) {
       filtered = filtered.filter(course =>
-        (course.categories || []).some(cat => selectedCategories.includes(cat))
+        selectedCategories.every(cat =>
+          (course.categories || []).includes(cat)
+        )
       );
     }
 
